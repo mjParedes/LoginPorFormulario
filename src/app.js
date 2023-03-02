@@ -5,8 +5,7 @@ import handlebars from 'express-handlebars';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 // import FileStore from 'session-file-store';
-import mongoStore from 'connect-mongo'
-
+import MongoStore from 'connect-mongo'
 //? Personalizados 
 import { __dirname } from './utils.js';
 import './dbConfig.js'
@@ -20,12 +19,23 @@ import { messagesModel } from './dao/models/messages.model.js';
 
 const app = express()
 
-
 //?  Seteo de aplicacion
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static(__dirname + '/public'))
 app.use(cookieParser())
+
+//? Session Mongo
+app.use(
+    session({
+        store:MongoStore.create({
+            mongoUrl: "mongodb+srv://matuDev2505:w8YEfwAn4dw9jCNF@matudevcluster.hyuyofr.mongodb.net/ecommerce?retryWrites=true&w=majority"
+        }),
+        resave: false,
+        saveUninitialized: false,
+        secret: 'sessionKey',
+        cookie: { max: 60000 }
+    }))
 
 //? Handlebars
 app.engine('handlebars', handlebars.engine())
@@ -41,20 +51,10 @@ app.use('/users', usersRouter)
 
 //? Ruta raiz
 app.get('/', (req, res) => {
-    res.render('layouts/main')
+    res.redirect('/views/login')
 })
 
-//? Session Mongo
-app.use(
-    session({
-        store: new mongoStore({
-            mongoUrl: "mongodb+srv://matuDev2505:w8YEfwAn4dw9jCNF@matudevcluster.hyuyofr.mongodb.net/ecommerce?retryWrites=true&w=majority"
-        }),
-        resave: false,
-        saveUninitialized: false,
-        secret: 'sessionKey',
-        cookie: { max: 30000 }
-    }))
+
 
 
 const PORT = 8080
